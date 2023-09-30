@@ -11,7 +11,7 @@ public class Terrarium : MonoBehaviour
     
     private List<List<Tile>> m_tiles;
     private List<Entity> m_entities;
-    // Start is called before the first frame update
+
     void Awake()
     {
         m_tiles = new List<List<Tile>>();
@@ -25,6 +25,12 @@ public class Terrarium : MonoBehaviour
     {
         Vector3 localPosition = transform.InverseTransformPoint(_position + Vector3.one * 0.5f);
         return new Position((int)math.floor(localPosition.x), -(int)math.floor(localPosition.y)) - m_offset;
+    }
+
+    public Vector3 TerrariumPositionToWorld(Position _position)
+    {
+        Position exactPosition = _position + m_offset;
+        return transform.InverseTransformPoint(new Vector3(exactPosition.x, -exactPosition.y));
     }
     
     public bool TryFindEntitiesAtPosition(Position _position, out List<Entity> _entities)
@@ -60,9 +66,15 @@ public class Terrarium : MonoBehaviour
     }
 
     
-    public bool CanSpawnTileAtPosition(Position _position, out Tile _tileAtPosition)
+    public bool CanSpawnTileAtPosition(Position _position, TileData _data, out Tile _tileAtPosition)
     {
-        return TryFindTileAtPosition(_position, out _tileAtPosition);
+        _tileAtPosition = null;
+        if (TryFindTileAtPosition(_position, out _tileAtPosition))
+        {
+            return _data.CanSpawnOnTile(_tileAtPosition);
+        }
+
+        return false;
     }
     private void InitTiles()
     {

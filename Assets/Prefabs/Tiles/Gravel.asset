@@ -10,16 +10,16 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 660388319d80d45458025b5db295a416, type: 3}
-  m_Name: Dirt
+  m_Name: Gravel
   m_EditorClassIdentifier: 
-  type: 0
+  type: 1
   sprite: {fileID: 21300000, guid: 8fc5196deb642f648bdf698cdca44fc6, type: 3}
-  waterDownTransfer: 0.1
-  waterSideTransfer: 0.05
+  waterDownTransfer: 1
+  waterSideTransfer: 0
   color:
     serializedVersion: 2
-    key0: {r: 0.7254902, g: 0.4784314, b: 0.34117648, a: 1}
-    key1: {r: 0.3207547, g: 0.20263235, b: 0.19215022, a: 1}
+    key0: {r: 0.49803925, g: 0.49803925, b: 0.49803925, a: 1}
+    key1: {r: 0.1981132, g: 0.1981132, b: 0.1981132, a: 1}
     key2: {r: 0, g: 0, b: 0, a: 0}
     key3: {r: 0, g: 0, b: 0, a: 0}
     key4: {r: 0, g: 0, b: 0, a: 0}
