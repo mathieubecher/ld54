@@ -21,7 +21,6 @@ public class MouseManager : MonoBehaviour
     private Camera m_cameraRef;
     private bool m_click;
     
-    [SerializeField] private Terrarium m_terrarium;
     [SerializeField] private Transform m_hoverTileUI;
     
     [SerializeField] private Position m_currentMousePosition;
@@ -55,15 +54,15 @@ public class MouseManager : MonoBehaviour
         
         var mouseWorldPos = m_cameraRef.ScreenToWorldPoint(Input.mousePosition);
         mouseWorldPos.z = 0f;
-        Position mousePosition = m_terrarium.WorldToTerrariumPosition(mouseWorldPos);
-        if(m_terrarium.TryFindTileAtPosition(m_currentMousePosition, out Tile tile))
+        Position mousePosition = GameManager.terrarium.WorldToTerrariumPosition(mouseWorldPos);
+        if(GameManager.terrarium.TryFindTileAtPosition(m_currentMousePosition, out Tile tile))
         {
-            m_hoverTileUI.position = m_terrarium.TerrariumPositionToWorld(m_currentMousePosition);
+            m_hoverTileUI.position = GameManager.terrarium.TerrariumPositionToWorld(m_currentMousePosition);
             m_hoverTileUI.gameObject.SetActive(true);
             
             if(m_click && mousePosition != m_currentMousePosition && m_selectedBrush)
             {
-                m_selectedBrush.TryApply(m_terrarium, mousePosition);
+                m_selectedBrush.TryApply(GameManager.terrarium, mousePosition);
             }
         }
         else
@@ -90,7 +89,7 @@ public class MouseManager : MonoBehaviour
         m_click = true;
         if (m_selectedBrush)
         {
-            m_selectedBrush.TryApply(m_terrarium, m_currentMousePosition);
+            m_selectedBrush.TryApply(GameManager.terrarium, m_currentMousePosition);
         }
     }
     private void OnRelease()

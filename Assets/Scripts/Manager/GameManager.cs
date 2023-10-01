@@ -1,6 +1,8 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
+using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -18,6 +20,9 @@ public class GameManager : MonoBehaviour
             return m_instance;
         }
     }
+
+    public static Terrarium terrarium => instance.m_terrarium;
+    
     public delegate void NextTurnEvent(int _currentTurn);
     public static NextTurnEvent OnNextTurnBegin;
 
@@ -28,6 +33,7 @@ public class GameManager : MonoBehaviour
     public bool isPaused => m_isPaused;
     
     [SerializeField] private Terrarium m_terrarium;
+    [SerializeField] private TextMeshProUGUI m_waterUI;
     [SerializeField] private Animator m_animatorUI;
     [SerializeField] private Slider m_turnSlider;
     [SerializeField] private float m_turnDuration = 0.5f;
@@ -48,6 +54,8 @@ public class GameManager : MonoBehaviour
                 OnNextTurnBegin?.Invoke(m_currentTurn);
             }
         }
+
+        m_waterUI.text = $"Water : {(int)math.ceil(terrarium.GetWaterPercent() * 100.0f)}%";
     }
 
 

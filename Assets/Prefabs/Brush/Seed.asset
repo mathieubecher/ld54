@@ -9,10 +9,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1857ec9137135cd42ba91be12d39ddfb, type: 3}
-  m_Name: Gravel
+  m_Script: {fileID: 11500000, guid: 98375563e676b9542a73ac3004274e1b, type: 3}
+  m_Name: Seed
   m_EditorClassIdentifier: 
   m_cursorSprite: {fileID: 0}
-  m_buttonSprite: {fileID: 1778001296, guid: 30b51d20338ce48489e0bc01d4a78a32, type: 3}
-  m_total: 10
-  m_data: {fileID: 11400000, guid: 1321ff9a75f5e9c489bff7ca13c7ba21, type: 2}
+  m_buttonSprite: {fileID: 1485536872, guid: 30b51d20338ce48489e0bc01d4a78a32, type: 3}
+  m_total: 2
+  m_entity: {fileID: 371784888137415212, guid: aef03540425adf9498300002c4db998b, type: 3}

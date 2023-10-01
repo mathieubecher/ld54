@@ -19,6 +19,6 @@ public class WaterBrush : Brush
     protected override void Apply(Terrarium _terrarium, Tile _tile)
     {
         base.Apply(_terrarium, _tile);
-        _tile.Humidify(m_waterAdd, true);
+        _tile.Humidify(m_waterAdd);
     }
 }

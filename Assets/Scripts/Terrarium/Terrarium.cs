@@ -12,6 +12,8 @@ public class Terrarium : MonoBehaviour
     private List<List<Tile>> m_tiles;
     private List<Entity> m_entities;
 
+    public Position offset => m_offset;
+
     void Awake()
     {
         m_tiles = new List<List<Tile>>();
@@ -24,12 +26,12 @@ public class Terrarium : MonoBehaviour
     public Position WorldToTerrariumPosition(Vector3 _position)
     {
         Vector3 localPosition = transform.InverseTransformPoint(_position + Vector3.one * 0.5f);
-        return new Position((int)math.floor(localPosition.x), -(int)math.floor(localPosition.y)) - m_offset;
+        return new Position((int)math.floor(localPosition.x), -(int)math.floor(localPosition.y));
     }
 
     public Vector3 TerrariumPositionToWorld(Position _position)
     {
-        Position exactPosition = _position + m_offset;
+        Position exactPosition = _position;
         return transform.InverseTransformPoint(new Vector3(exactPosition.x, -exactPosition.y));
     }
     
@@ -42,11 +44,12 @@ public class Terrarium : MonoBehaviour
     public bool TryFindTileAtPosition(Position _position, out Tile _tile)
     {
         _tile = null;
-        if (_position.y >= 0 && _position.y < m_tiles.Count)
+        Position realPosition = _position - offset;
+        if (realPosition.y >= 0 && realPosition.y < m_tiles.Count)
         {
-            if (_position.x >= 0 && _position.x < m_tiles[_position.y].Count)
+            if (realPosition.x >= 0 && realPosition.x < m_tiles[realPosition.y].Count)
             {
-                _tile = m_tiles[_position.y][_position.x];
+                _tile = m_tiles[realPosition.y][realPosition.x];
                 return _tile;
             }
         }
@@ -94,9 +97,9 @@ public class Terrarium : MonoBehaviour
 
                 GameObject tileObject = Instantiate(m_defaultTile, transform);
                 Tile tile = tileObject.GetComponent<Tile>();
-                Position position = new Position(x, y) + m_offset;
+                Position position = new Position(x, y) + offset;
                 tileObject.transform.localPosition = new Vector3(position.x, -position.y);
-                tile.Init(position);
+                tile.Init(this, position);
                 currentLine.Add(tile);
                 ++x;
             }
@@ -124,13 +127,38 @@ public class Terrarium : MonoBehaviour
         }
     }
 
-    public void UpdateTurn()
+
+    public float GetWaterPercent()
     {
-        foreach (Entity entity in m_entities)
+        float waterInTerrarium = 0.0f;
+        int nbBox = 0;
+        for (int y = 0; y < m_tiles.Count; ++y)
         {
-            entity.UpdateTurn();
+            for (int x = 0; x < m_tiles[y].Count; ++x)
+            {
+                if (!m_tiles[y][x]) continue;
+                ++nbBox;
+                waterInTerrarium += m_tiles[y][x].totalWater;
+            }
         }
 
+        return waterInTerrarium / (float)nbBox;
+    }
+
+    public void AddEntity(Entity _entity)
+    {
+        m_entities.Add(_entity);
+    }
+
+    public void UpdateTurn()
+    {
+        for (int i = 0; i < m_entities.Count; ++i)
+        {
+            if(m_entities[i]) m_entities[i].UpdateTurn();
+        }
+        
+        m_entities.RemoveAll(x => x == null || x.gameObject == null);
+        
         for (int y = m_tiles.Count - 1; y >= 0 ; --y)
         {
             for (int x = 0; x < m_tiles[y].Count; ++x)
@@ -163,7 +191,7 @@ public class Terrarium : MonoBehaviour
         {
             for (int x = 0; x < m_tiles[y].Count; ++x)
             {
-                if(m_tiles[y][x]) m_tiles[y][x].UpdateWaterTurn();
+                if(m_tiles[y][x]) m_tiles[y][x].UpdateLateTurn();
             }
         }
     }
@@ -184,4 +212,5 @@ public class Terrarium : MonoBehaviour
             }
         }
     }
+
 }

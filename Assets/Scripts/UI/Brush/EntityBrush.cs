@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -6,7 +7,23 @@ using UnityEngine;
 public class EntityBrush :Brush
 {
     public Entity m_entity;
-    
+    private List<Entity> m_entities;
+
+    private void Awake()
+    {
+        m_entities = new List<Entity>();
+    }
+
+    private void OnDestroy()
+    {
+        foreach (Entity entity in m_entities)
+        {
+            entity.OnRemoveByTool -= OnRemoveEntityByTool;
+        }
+
+        m_entities = new List<Entity>();
+    }
+
     public override BrushResult TryApply(Terrarium _terrarium, Position _position)
     {
         if (m_number <= 0) return BrushResult.FAIL;
@@ -23,8 +40,15 @@ public class EntityBrush :Brush
     protected override void Apply(Terrarium _terrarium, Tile _tile)
     {
         base.Apply(_terrarium, _tile);
-        var entity = Instantiate(m_entity, _terrarium.transform);
-        entity.Init(_tile, this);
-        
+        Entity entity = Entity.Spawn(_terrarium, _tile, m_entity);
+        entity.OnRemoveByTool += OnRemoveEntityByTool;
+        m_entities.Add(entity);
+    }
+
+    private void OnRemoveEntityByTool(Entity _entity)
+    {
+        _entity.OnRemoveByTool -= OnRemoveEntityByTool;
+        m_entities.Remove(_entity);
+        RemoveItemInTerrarium();
     }
 }

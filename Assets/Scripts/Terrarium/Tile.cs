@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Unity.Mathematics;
 using UnityEngine;
 
@@ -14,11 +15,14 @@ public class Tile : MonoBehaviour
     private SpriteRenderer m_sprite;
     private Brush m_brush;
     
+    private Terrarium m_terrarium;
     private bool m_isFloor;
     private bool m_isCeil;
     [SerializeField] private float m_water = 0.0f;
-    [SerializeField] private float m_waterAdded = 0.0f;
-    public float water => m_water + m_waterAdded;
+    [SerializeField] private float m_waterToEvaporate = 0.0f;
+    public float water => m_water;
+    public float totalWater => m_water + m_waterToEvaporate;
+    public Neighbours neighbours => m_neighbours;
     
     public Position position => m_position;
     public TileData.TileType type => m_data.type;
@@ -28,8 +32,9 @@ public class Tile : MonoBehaviour
         m_sprite = GetComponent<SpriteRenderer>();
     }
     
-    public void Init(Position _position)
+    public void Init(Terrarium _terrarium, Position _position)
     {
+        m_terrarium = _terrarium;
         m_position = _position;
     }
     
@@ -61,26 +66,29 @@ public class Tile : MonoBehaviour
         m_isFloor = !m_neighbours.bottom;
     }
 
-    public void Humidify(float _value, bool _applyDirectly = false)
+    public void Humidify(float _value)
     {
-        if(_applyDirectly)
-        {
-            m_water = math.clamp(m_water + _value, 0.0f, 1.0f);
-            m_sprite.color = m_data.color.Evaluate(m_water);
-        }
-        else m_waterAdded += _value;
+        m_water = math.clamp(m_water + _value, 0.0f, 1.0f);
+        m_sprite.color = m_data.color.Evaluate(m_water);
     }
 
     public void Evaporate(float _value)
     {
+        if (_value == 0.0f) return;
         float waterToEvaporate = math.min(m_water, _value);
         m_water -= waterToEvaporate;
         AddWaterToCeil(waterToEvaporate);
     }
 
-    private void AddWaterToCeil(float _waterEvaporated)
+    public float DrainWater(float _waterDrain)
     {
-        if (m_isCeil) m_waterAdded += _waterEvaporated;
+        float waterDrained = math.min(m_water, _waterDrain);
+        m_water -= waterDrained;
+        return waterDrained;
+    }
+    public void AddWaterToCeil(float _waterEvaporated)
+    {
+        if (m_isCeil) m_waterToEvaporate += _waterEvaporated;
         else m_neighbours.up.AddWaterToCeil(_waterEvaporated);
     }
 
@@ -89,17 +97,30 @@ public class Tile : MonoBehaviour
         Evaporate(m_data.waterEvaporation);
     }
     
+    public virtual void UpdateWaterDown()
+    {
+        bool canShareDown = m_neighbours.bottom && m_neighbours.bottom.water < 1.0f;
+        
+        float waterToShare = 0.0f;
+        if (canShareDown)
+        {
+            float waterToShareDown = math.min(1.0f - m_neighbours.bottom.water, math.min(water, m_data.waterDownTransfer));
+            m_neighbours.bottom.Humidify(waterToShareDown);
+            m_water -= waterToShareDown;
+            waterToShare += m_data.waterDownTransfer - waterToShareDown;
+        }
+        else waterToShare += m_data.waterDownTransfer;
+    }
+    
     public virtual void UpdateWaterLeft()
     {
-        Evaporate(m_data.waterEvaporation);
-
         bool canShareLeft = m_neighbours.left && m_neighbours.left.water < water;
 
         float waterToShare = 0.0f;
         if (canShareLeft)
         {
             float waterToShareLeft =
-                math.min(1.0f - m_neighbours.left.water, math.min(m_water, m_data.waterSideTransfer));
+                math.min(1.0f - m_neighbours.left.water, math.min(water, m_data.waterSideTransfer));
             m_neighbours.left.Humidify(waterToShareLeft);
             m_water -= waterToShareLeft;
             waterToShare += m_data.waterSideTransfer - waterToShareLeft;
@@ -115,7 +136,7 @@ public class Tile : MonoBehaviour
         float waterToShare = 0.0f;
         if (canShareRight)
         {
-            float waterToShareRight = math.min(1.0f - m_neighbours.right.water, math.min(m_water, m_data.waterSideTransfer));
+            float waterToShareRight = math.min(1.0f - m_neighbours.right.water, math.min(water, m_data.waterSideTransfer));
             m_neighbours.right.Humidify(waterToShareRight);
             m_water -= waterToShareRight;
             waterToShare += m_data.waterSideTransfer - waterToShareRight;
@@ -123,30 +144,22 @@ public class Tile : MonoBehaviour
         else waterToShare += m_data.waterSideTransfer;
     }
     
-    public virtual void UpdateWaterDown()
+    public virtual void UpdateLateTurn()
     {
-        bool canShareDown = m_neighbours.bottom && m_neighbours.bottom.water < 1.0f;
-        
-        float waterToShare = 0.0f;
-        if (canShareDown)
-        {
-            float waterToShareDown = math.min(1.0f - m_neighbours.bottom.water, math.min(m_water, m_data.waterDownTransfer));
-            m_neighbours.bottom.Humidify(waterToShareDown);
-            m_water -= waterToShareDown;
-            waterToShare += m_data.waterDownTransfer - waterToShareDown;
-        }
-        else waterToShare += m_data.waterDownTransfer;
-    }
-    public virtual void UpdateWaterTurn()
-    {
-        m_water = math.clamp(m_water + m_waterAdded, 0.0f, 1.0f);
+        float condensation = math.min(m_waterToEvaporate, 1.0f - m_water);
+        m_water += condensation;
+        m_waterToEvaporate -= condensation;
         m_sprite.color = m_data.color.Evaluate(m_water);
-        m_waterAdded = 0.0f;
 
     }
     
     public virtual void Reset()
     {
         
+    }
+    
+    public List<Entity> GetEntities()
+    {
+        return GetComponentsInChildren<Entity>().ToList();
     }
 }
