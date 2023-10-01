@@ -16,8 +16,9 @@ public class Tile : MonoBehaviour
     
     private bool m_isFloor;
     private bool m_isCeil;
-    private float m_water = 0.0f;
-    public float water => m_water;
+    [SerializeField] private float m_water = 0.0f;
+    [SerializeField] private float m_waterAdded = 0.0f;
+    public float water => m_water + m_waterAdded;
     
     public Position position => m_position;
     public TileData.TileType type => m_data.type;
@@ -60,13 +61,87 @@ public class Tile : MonoBehaviour
         m_isFloor = !m_neighbours.bottom;
     }
 
-    public void Humidify(float value)
+    public void Humidify(float _value, bool _applyDirectly = false)
     {
-        m_water = math.clamp(m_water + value, 0.0f, 1.0f);
-        m_sprite.color = m_data.color.Evaluate(m_water);
+        if(_applyDirectly)
+        {
+            m_water = math.clamp(m_water + _value, 0.0f, 1.0f);
+            m_sprite.color = m_data.color.Evaluate(m_water);
+        }
+        else m_waterAdded += _value;
+    }
+
+    public void Evaporate(float _value)
+    {
+        float waterToEvaporate = math.min(m_water, _value);
+        m_water -= waterToEvaporate;
+        AddWaterToCeil(waterToEvaporate);
+    }
+
+    private void AddWaterToCeil(float _waterEvaporated)
+    {
+        if (m_isCeil) m_waterAdded += _waterEvaporated;
+        else m_neighbours.up.AddWaterToCeil(_waterEvaporated);
+    }
+
+    public virtual void UpdateTurnLeft()
+    {
+        Evaporate(m_data.waterEvaporation);
+
+        bool canShareLeft = m_neighbours.left && m_neighbours.left.water < water;
+
+        float waterToShare = 0.0f;
+        if (canShareLeft)
+        {
+            float waterToShareLeft =
+                math.min(1.0f - m_neighbours.left.water, math.min(m_water, m_data.waterSideTransfer));
+            m_neighbours.left.Humidify(waterToShareLeft);
+            m_water -= waterToShareLeft;
+            waterToShare += m_data.waterSideTransfer - waterToShareLeft;
+        }
+        else waterToShare += m_data.waterSideTransfer;
+
+    }
+
+    public virtual void UpdateTurnRight()
+    {
+        Evaporate(m_data.waterEvaporation);
+
+        bool canShareRight = m_neighbours.right && m_neighbours.right.water < water;
+        
+        float waterToShare = 0.0f;
+        if (canShareRight)
+        {
+            float waterToShareRight = math.min(1.0f - m_neighbours.right.water, math.min(m_water, m_data.waterSideTransfer));
+            m_neighbours.right.Humidify(waterToShareRight);
+            m_water -= waterToShareRight;
+            waterToShare += m_data.waterSideTransfer - waterToShareRight;
+        }
+        else waterToShare += m_data.waterSideTransfer;
     }
     
-    public virtual void UpdateTile()
+    public virtual void UpdateTurnDown()
+    {
+        bool canShareDown = m_neighbours.bottom && m_neighbours.bottom.water < 1.0f;
+        
+        float waterToShare = 0.0f;
+        if (canShareDown)
+        {
+            float waterToShareDown = math.min(1.0f - m_neighbours.bottom.water, math.min(m_water, m_data.waterDownTransfer));
+            m_neighbours.bottom.Humidify(waterToShareDown);
+            m_water -= waterToShareDown;
+            waterToShare += m_data.waterDownTransfer - waterToShareDown;
+        }
+        else waterToShare += m_data.waterDownTransfer;
+    }
+    public virtual void UpdateLateTurn()
+    {
+        m_water = math.clamp(m_water + m_waterAdded, 0.0f, 1.0f);
+        m_sprite.color = m_data.color.Evaluate(m_water);
+        m_waterAdded = 0.0f;
+    }
+    
+    public virtual void Reset()
     {
         
     }

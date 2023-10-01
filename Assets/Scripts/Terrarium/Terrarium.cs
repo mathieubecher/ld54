@@ -123,4 +123,58 @@ public class Terrarium : MonoBehaviour
             }
         }
     }
+
+    public void UpdateTurn()
+    {
+        foreach (Entity entity in m_entities)
+        {
+            entity.UpdateTurn();
+        }
+
+        for (int y = m_tiles.Count - 1; y >= 0 ; --y)
+        {
+            for (int x = 0; x < m_tiles[y].Count; ++x)
+            {
+                if(m_tiles[y][x]) m_tiles[y][x].UpdateTurnLeft();
+            }
+        }
+        for (int y = m_tiles.Count - 1; y >= 0 ; --y)
+        {
+            for (int x = m_tiles[y].Count - 1; x >= 0 ; --x)
+            {
+                if(m_tiles[y][x]) m_tiles[y][x].UpdateTurnRight();
+            }
+        }
+        for (int y = m_tiles.Count - 1; y >= 0 ; --y)
+        {
+            for (int x = 0; x < m_tiles[y].Count; ++x)
+            {
+                if(m_tiles[y][x]) m_tiles[y][x].UpdateTurnDown();
+            }
+        }
+        for (int y = m_tiles.Count - 1; y >= 0 ; --y)
+        {
+            for (int x = 0; x < m_tiles[y].Count; ++x)
+            {
+                if(m_tiles[y][x]) m_tiles[y][x].UpdateLateTurn();
+            }
+        }
+    }
+
+    public void ResetSimulation()
+    {
+        
+        foreach (Entity entity in m_entities)
+        {
+            entity.Reset();
+        }
+
+        for (int y = 0; y < m_tiles.Count; ++y)
+        {
+            for (int x = 0; x < m_tiles[y].Count; ++x)
+            {
+                if(m_tiles[y][x]) m_tiles[y][x].Reset();
+            }
+        }
+    }
 }

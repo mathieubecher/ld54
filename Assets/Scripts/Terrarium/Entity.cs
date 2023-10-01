@@ -39,7 +39,12 @@ public class Entity : MonoBehaviour
         return m_canMoveInType.Exists(x => x == _tile.type);
     }
     
-    public virtual void UpdateEntity()
+    public virtual void UpdateTurn()
+    {
+        
+    }
+
+    public virtual void Reset()
     {
         
     }

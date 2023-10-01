@@ -47,6 +47,12 @@ public class MouseManager : MonoBehaviour
 
     void Update()
     {
+        if (GameManager.instance.isRunning)
+        {
+            m_hoverTileUI.gameObject.SetActive(false);
+            return;
+        }
+        
         var mouseWorldPos = m_cameraRef.ScreenToWorldPoint(Input.mousePosition);
         mouseWorldPos.z = 0f;
         Position mousePosition = m_terrarium.WorldToTerrariumPosition(mouseWorldPos);
@@ -57,7 +63,7 @@ public class MouseManager : MonoBehaviour
             
             if(m_click && mousePosition != m_currentMousePosition && m_selectedBrush)
             {
-                m_selectedBrush.TryApply(m_terrarium, m_currentMousePosition);
+                m_selectedBrush.TryApply(m_terrarium, mousePosition);
             }
         }
         else
@@ -80,6 +86,7 @@ public class MouseManager : MonoBehaviour
     
     private void OnClick()
     {
+        if (GameManager.instance.isRunning) return;
         m_click = true;
         if (m_selectedBrush)
         {

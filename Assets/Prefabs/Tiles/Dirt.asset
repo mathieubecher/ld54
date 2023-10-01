@@ -14,8 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   type: 0
   sprite: {fileID: 21300000, guid: 8fc5196deb642f648bdf698cdca44fc6, type: 3}
-  waterDownTransfer: 0.1
+  waterDownTransfer: 0.2
   waterSideTransfer: 0.05
+  waterEvaporation: 0
   color:
     serializedVersion: 2
     key0: {r: 0.7254902, g: 0.4784314, b: 0.34117648, a: 1}

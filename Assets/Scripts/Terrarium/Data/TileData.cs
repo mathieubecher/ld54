@@ -15,6 +15,7 @@ public class TileData : ScriptableObject
     public Sprite sprite;
     public float waterDownTransfer = 1.0f;
     public float waterSideTransfer = 0.0f;
+    public float waterEvaporation = 0.0f;
     public Gradient color;
     
     public bool CanSpawnOnTile(Tile _tile)
