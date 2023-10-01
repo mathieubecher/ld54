@@ -135,28 +135,35 @@ public class Terrarium : MonoBehaviour
         {
             for (int x = 0; x < m_tiles[y].Count; ++x)
             {
-                if(m_tiles[y][x]) m_tiles[y][x].UpdateTurnLeft();
+                if(m_tiles[y][x]) m_tiles[y][x].FirstUpdate();
+            }
+        }
+        for (int y = m_tiles.Count - 1; y >= 0 ; --y)
+        {
+            for (int x = 0; x < m_tiles[y].Count; ++x)
+            {
+                if(m_tiles[y][x]) m_tiles[y][x].UpdateWaterLeft();
             }
         }
         for (int y = m_tiles.Count - 1; y >= 0 ; --y)
         {
             for (int x = m_tiles[y].Count - 1; x >= 0 ; --x)
             {
-                if(m_tiles[y][x]) m_tiles[y][x].UpdateTurnRight();
+                if(m_tiles[y][x]) m_tiles[y][x].UpdateWaterRight();
             }
         }
         for (int y = m_tiles.Count - 1; y >= 0 ; --y)
         {
             for (int x = 0; x < m_tiles[y].Count; ++x)
             {
-                if(m_tiles[y][x]) m_tiles[y][x].UpdateTurnDown();
+                if(m_tiles[y][x]) m_tiles[y][x].UpdateWaterDown();
             }
         }
         for (int y = m_tiles.Count - 1; y >= 0 ; --y)
         {
             for (int x = 0; x < m_tiles[y].Count; ++x)
             {
-                if(m_tiles[y][x]) m_tiles[y][x].UpdateLateTurn();
+                if(m_tiles[y][x]) m_tiles[y][x].UpdateWaterTurn();
             }
         }
     }

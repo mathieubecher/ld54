@@ -84,7 +84,12 @@ public class Tile : MonoBehaviour
         else m_neighbours.up.AddWaterToCeil(_waterEvaporated);
     }
 
-    public virtual void UpdateTurnLeft()
+    public virtual void FirstUpdate()
+    {
+        Evaporate(m_data.waterEvaporation);
+    }
+    
+    public virtual void UpdateWaterLeft()
     {
         Evaporate(m_data.waterEvaporation);
 
@@ -103,10 +108,8 @@ public class Tile : MonoBehaviour
 
     }
 
-    public virtual void UpdateTurnRight()
+    public virtual void UpdateWaterRight()
     {
-        Evaporate(m_data.waterEvaporation);
-
         bool canShareRight = m_neighbours.right && m_neighbours.right.water < water;
         
         float waterToShare = 0.0f;
@@ -120,7 +123,7 @@ public class Tile : MonoBehaviour
         else waterToShare += m_data.waterSideTransfer;
     }
     
-    public virtual void UpdateTurnDown()
+    public virtual void UpdateWaterDown()
     {
         bool canShareDown = m_neighbours.bottom && m_neighbours.bottom.water < 1.0f;
         
@@ -134,11 +137,12 @@ public class Tile : MonoBehaviour
         }
         else waterToShare += m_data.waterDownTransfer;
     }
-    public virtual void UpdateLateTurn()
+    public virtual void UpdateWaterTurn()
     {
         m_water = math.clamp(m_water + m_waterAdded, 0.0f, 1.0f);
         m_sprite.color = m_data.color.Evaluate(m_water);
         m_waterAdded = 0.0f;
+
     }
     
     public virtual void Reset()
